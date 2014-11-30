@@ -1,3 +1,6 @@
+All information pulled from http://www.cheese.com/		
+
+
 | NAME                | MILK SOURCE         | COUNTRY        | TYPE       | TEXTURE                              | COLOUR        | FLAVOUR                                  | AROMA                   | VEGETARIAN |
 |---------------------|---------------------|----------------|------------|--------------------------------------|---------------|------------------------------------------|-------------------------|------------|
 | gouda               | Cow / goat / sheep  | netherlands    | semi hard  | compact, crumbly, dense, springy     | yellow        | creamy, full-flavoured, nutty, sweet     | pungent                 | no         |
