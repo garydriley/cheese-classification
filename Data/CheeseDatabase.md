@@ -1,4 +1,4 @@
-| Milk Source | Country        | Cheese              | Type      | Texture      | Colour      | Flavour | Aroma    | Common useage |
+| Milk Source | Country        | Cheese              | Type      | Texture      | Colour      | Flavour | Aroma    | Common Usage  |
 |-------------|----------------|---------------------|-----------|--------------|-------------|---------|----------|---------------|
 | cow         | netherlands    | Gouda               | semi-hard | firm         | yellow      | rich    | pungent  | table-cheese  |
 | cow         | england        | Cheddar             | hard      | firm         | yellow      | strong  | none     | melting       |
