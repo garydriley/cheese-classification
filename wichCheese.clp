@@ -479,7 +479,7 @@
   ?fromage <- (cheese (colour $?colour))
   =>
   (if (not (member$ ?c $?colour))
-    then (retract ?fromage) (minusOne) (cheeseNotFound) (cheeseFound)
+    then (retract ?fromage) (minusOne) (cheeseFound)
   )
 )
 
@@ -507,7 +507,7 @@
   ?fromage <- (cheese (flavour $?flavour))
   =>
   (if (not (member$ ?f $?flavour))
-    then (retract ?fromage) (minusOne) (cheeseNotFound) (cheeseFound)
+    then (retract ?fromage) (minusOne) (cheeseFound)
   )
 )
 
@@ -533,7 +533,7 @@
   ?fromage <- (cheese (aroma $?aroma))
   =>
   (if (not (member$ ?a $?aroma))
-    then (retract ?fromage) (minusOne) (cheeseNotFound) (cheeseFound)
+    then (retract ?fromage) (minusOne) (cheeseFound)
   )
 )
 
@@ -558,7 +558,7 @@
   ?fromage <- (cheese (common-useage $?common-useage))
   =>
   (if (not (member$ ?u $?common-useage))
-    then (retract ?fromage) (minusOne) (cheeseNotFound) (cheeseFound)
+    then (retract ?fromage) (minusOne) (cheeseFound)
   )
 )
 
