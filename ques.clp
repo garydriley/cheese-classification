@@ -42,11 +42,16 @@
 	)
 )
 
-(defglobal ?*counter* = 1)
-
-(deffunction addOne ()
-	(bind ?*counter* (+ ?*counter* 1))
+(deftemplate rule 
+   (multislot if)
+   (multislot then)
 )
+
+;(defglobal ?*counter* = 1)
+
+;(deffunction addOne ()
+;	(bind ?*counter* (+ ?*counter* 1))
+;)
 
 (defrule get-question
 	(legalanswers ? $?answers)
@@ -56,32 +61,57 @@
 	(format t "%s " ?text)
 	(printout t ?answers " ")
 	(bind ?reply (read))
-	(assert (cheesedets ?category is ?value))
+	(assert (answer is ?reply))
+
+	;(if (answer is yes))
+		;then (assert (cheesedets ?category is ?value))
+		;?f1 <- (answer is yes)
+		;(retract ?f1)
+
+	(if (member (lowcase ?reply) ?answers) 
+     then (assert (cheesedets ?category is ?value))
+          ;(retract ?f2)
+     ;else (assert (goal is ?variable))
+    )
 )
 
 (defrule remove-facts
 	(cheesedets ?category is ?value)
-	;?f <- (cheese (name ?) (milk-source ?) (country ?) (type ~?value) (texture ?) (colour ?) (flavour ?) (aroma ?) (common-useage ?))
-	?f <- (type ~?value)
+	?f2 <- (cheese (name ?) (milk-source ?) (country ?) (type ~?value) (texture ?) (colour ?) (flavour ?) (aroma ?) (common-useage ?))
+	;?f3 <- (question ?category ~?value $?)
+	;?f <- (type ~?value)
 =>
-	(retract ?f)
+	;(retract ?f1)
+	(retract ?f2)
+	;(retract ?f3)
+)
+
+(defrule remove-question
+	(cheesedets ?category is ?value)
+	?f1 <- (cheesedets ?category is ?value)
+	?f2 <- (question ?category ~?value $?)
+=>
+	(retract ?f1)
+	(retract ?f2)
 )
 
 (deffacts knowledgebase
 
 	(legalanswers are yes no)
 
-	(question type hard "Is the type of cheese hard?")
-	(question type semi-hard "Is the type of cheese semi-hard?")
-	(question type semi-soft "Is the type of cheese semi-soft?")
-	(question type soft "Is the type of cheese soft?")
-	(question type blue "Is the type of cheese blue?")
-
-	(question texture crumbly "Is the type of cheese crumbly?")
-	(question texture springy "Is the type of cheese sprigy?")
-	(question texture firm "Is the type of cheese firm?")
-	(question texture creamy "Is the type of cheese creamy?")
+	
 	(question texture smooth "Is the type of cheese smooth?")
+	(question texture creamy "Is the type of cheese creamy?")
+	(question texture firm "Is the type of cheese firm?")
+	(question texture springy "Is the type of cheese sprigy?")
+	(question texture crumbly "Is the type of cheese crumbly?")
+	
+	(question type blue "Is the type of cheese blue?")
+	(question type soft "Is the type of cheese soft?")
+	(question type semi-soft "Is the type of cheese semi-soft?")
+	(question type semi-hard "Is the type of cheese semi-hard?")
+	(question type hard "Is the type of cheese hard?")
+
 
 	(cheese (name gouda) (milk-source cow) (country netherlands) (type semi-hard) (texture firm) (colour yellow) (flavour rich) (aroma pungent) (common-useage table-cheese))
 	(cheese (name cheddar) (milk-source cow) (country united-kingdom) (type hard) (texture firm) (colour yellow) (flavour strong) (aroma none) (common-useage melting))
