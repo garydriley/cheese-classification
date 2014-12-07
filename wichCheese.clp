@@ -388,6 +388,12 @@
 	(bind ?*counter* (- ?*counter* 1))
 )
 
+(deffunction cheeseFound()
+	(if (eq ?*counter* 1)
+		then (assert (found true))
+	)
+)
+
 ;;; This function is used for every question made to the user.
 ;;; The question is broken into three arguments (?qBEG ?qMID ?qEND)
 ;;; The argument $?allowed-values is a list that holds the responses that the program accepts.
@@ -458,7 +464,7 @@
 ;;; Given that the fact (cheeseColour ?colour) exists, this rule gets triggered. 
 ;;; This rule filters the cheese by colour, and deletes that do not match. As usual, we update our counter by calling the (minusOne) function.
 (defrule filterBy-Colour
-	(cheeseColuor ?c)
+	(cheeseColour ?c)
 	?fromage <- (cheese (colour $?colour))
 	=>
 	(if (not (member$ ?c $?colour))
@@ -483,7 +489,7 @@
 	?fromage <- (cheese (flavour $?flavour))
 	=>
 	(if (not (member$ ?f $?flavour))
-		then (retract ?fromage) (minusOne)
+		then (retract ?fromage) (minusOne) (cheeseFound)
 	)
 )
 
@@ -552,6 +558,7 @@
 ;;; If the fact (found true) is present, it means that we have only one (cheese) fact in memory, thus we have our specimen.
 ;;; We assign this animal to the variable ?fromage and print the details for the user
 (defrule matchFound
+	(declare (salience 1000))
 	?f <- (found true)
 	?fromage <- (cheese (name ?n) 
 						(milk-source ?m) 
@@ -570,7 +577,7 @@
 	(printout t "* Name: " ?n crlf)
 	(printout t "* Milk Source: " ?m crlf)
 	(printout t "* Country: " ?co crlf)
-	(printout t "* Texture: " ?tx crlf)
+	(printout t "* Texture: " ?tx ?bl crlf)
 	(printout t "* Colour: " ?c crlf)
 	(printout t "* Flavour: " ?fl crlf)
 	(printout t "* Aroma: " ?a crlf)
