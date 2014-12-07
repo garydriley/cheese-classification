@@ -33,10 +33,14 @@
 		(allowed-symbols cow goat sheep buffalo)
 		(default ?NONE)
 	)
-	(slot country (default ?NONE))
-	(multislot type
+	(multislot country
 		(type SYMBOL)
 		(allowed-symbols netherlands france italy greece united-states united-kingdom denmark norway sweden spain)
+		(default ?NONE)
+	)
+	(multislot type
+		(type SYMBOL)
+		(allowed-symbols semi-soft soft semi-hard hard blue)
 		(default ?NONE)
 	)
 	(multislot texture
