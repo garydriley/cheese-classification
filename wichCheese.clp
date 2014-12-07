@@ -435,7 +435,6 @@
 
 ;;; Now that we have a value for the fact (cheeseTexture ?texture), we trigger this rule to filter once again and delete the cheeses that do not have this property
 ;;; We update the counter as required
-
 (defrule filterBy-Texture
 	(cheeseTexture ?tx)
 	?fromage <- (cheese (texture $?texture))
@@ -444,3 +443,70 @@
 		then (retract ?fromage) (minusOne)
 	)
 )
+
+;;; Next up, we ask the user about the colour of the cheese.
+;;; The answer is stored as the following fact: (cheeseColour ?colour)
+(defrule mainQuestion-Colour
+	(cheeseTexture ?tx)
+	=>
+	(bind ?colour (ask-question "### What is the general colour of the cheese? (white yellow pale-yellow green) ### " "" "" white yellow pale-yellow green))
+	(assert (cheeseColour ?colour))
+)
+
+;;; Given that the fact (cheeseColour ?colour) exists, this rule gets triggered. 
+;;; This rule filters the cheese by color, and deletes that do not match. As usual, we update our counter by calling the (minusOne) function.
+(defrule filterBy-Colour
+	(cheeseColuor ?c)
+	?fromage <- (cheese (colour $?colour))
+	=>
+	(if (not (member$ ?c $?colour))
+		then (retract ?fromage) (minusOne)
+	)
+)
+
+
+;;; Continuing along, we ask the user about the flavour of the cheese
+;;; The answer is stored as the following fact: (cheeseFlavour: flavour)
+(defrule mainQuestion-Flavour
+	(cheeseColour ?c)
+	=>
+	(bind ?flavour (ask-question "### How would you describe the flavour of the cheese? (strong mild rich sweet spicy creamy) ### " "" "" strong mild rich sweet spicy creamy))
+	(assert (cheeseFlavour ?flavour))
+)
+
+;;; Now that we have a value for the fact (cheeseFlavour ?texture), we trigger this rule to filter once again and delete the cheeses that do not have this property
+;;; We update the counter as required
+(defrule filterBy-Flavour
+	(cheeseFlavour ?f)
+	?fromage <- (cheese (flavour $?flavour))
+	=>
+	(if (not (member$ ?f $?flavour))
+		then (retract ?fromage) (minusOne)
+	)
+)
+
+;;; After we have filtered the list by type, texture, colour and flavour the main propeperties of a cheese, we check the global variable ?*counter* to see if we can determine where to go next.
+;;; If we have one cheese left, then this is the answer and we can assert and trigger the success rule.
+;;; If 0 cheeses are left we assert false, as no cheese passed the filtering.
+;;; If there exists more than one cheese in the list, then we know that we need additional details and so we query the user for supplemental information. We assert (needMoreFacts ?type ?texture ?colour) for the program to progress.
+
+(defrule postFilteringEvaluation
+	?type <- (cheeseType ?t)
+	?texture <- (cheeseTexture ?tx)
+	?colour <- (cheeseColour ?c)
+	?flavour <- (cheeseFlavour ?f)
+	=>
+	(retract ?type ?texture ?colour ?flavour)
+	(if (eq ?*counter* 1)
+		then (assert (found true))
+	else (if (eq ?*counter* 0)
+			then (assert (found false))
+		 ) 
+	else (if (> ?*counter* 1)
+			then (assert (needMoreFacts ?t ?tx ?c ?f))
+		 ) 
+	)	
+)
+
+;;; If we're at this point it needs that we need more facts about the cheese in question.
+
