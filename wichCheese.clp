@@ -315,7 +315,7 @@
   			(country "italy") 
   			(type semi-soft) 
   			(texture firm) 
-  			(color white) 
+  			(colour white) 
   			(flavour mild) 
   			(aroma pungent) 
   			(common-useage salad)
@@ -326,7 +326,7 @@
   			(country "united-kingdom") 
   			(type soft) 
   			(texture smooth) 
-  			(color white) 
+  			(colour white) 
   			(flavour rich) 
   			(aroma none) 
   			(common-useage bread)
@@ -337,7 +337,7 @@
   			(country "germany") 
   			(type semi-soft) 
   			(texture firm) 
-  			(color yellow) 
+  			(colour yellow) 
   			(flavour sweet) 
   			(aroma none) 
   			(common-useage dip)
@@ -348,7 +348,7 @@
   			(country "switzerland") 
   			(type hard) 
   			(texture firm) 
-  			(color green) 
+  			(colour green) 
   			(flavour rich) 
   			(aroma pleasant) 
   			(common-useage bread)
@@ -359,7 +359,7 @@
   			(country "italy") 
   			(type hard) 
   			(texture smooth) 
-  			(color pale-yellow) 
+  			(colour pale-yellow) 
   			(flavour rich) 
   			(aroma pleasant) 
   			(common-useage salad)
@@ -370,7 +370,7 @@
   			(country "spain") 
   			(type semi-soft) 
   			(texture smooth) 
-  			(color pale-yellow) 
+  			(colour pale-yellow) 
   			(flavour sweet) 
   			(aroma none) 
   			(common-useage table-cheese)
@@ -454,7 +454,7 @@
 )
 
 ;;; Given that the fact (cheeseColour ?colour) exists, this rule gets triggered. 
-;;; This rule filters the cheese by color, and deletes that do not match. As usual, we update our counter by calling the (minusOne) function.
+;;; This rule filters the cheese by colour, and deletes that do not match. As usual, we update our counter by calling the (minusOne) function.
 (defrule filterBy-Colour
 	(cheeseColuor ?c)
 	?fromage <- (cheese (colour $?colour))
@@ -485,7 +485,26 @@
 	)
 )
 
-;;; After we have filtered the list by type, texture, colour and flavour the main propeperties of a cheese, we check the global variable ?*counter* to see if we can determine where to go next.
+;;; For further refinement, we ask the user about the aroma of the cheese before we proceed to check the list of cheeses that remain
+;;; The answer is stored as the following fact: (cheeseAroma: aroma)
+(defrule mainQuestion-Aroma
+	(cheeseFlavour ?f)
+	=>
+	(bind ?aroma (ask-question "### How would you describe the aroma of the cheese? (strong mild pleasant pungent none) ### " "" "" strong mild pleasant pungent none))
+	(assert (cheeseAroma ?aroma))
+)
+
+;;; Filter and update by aroma
+(defrule filterBy-Aroma
+	(cheeseAroma ?a)
+	?fromage <- (cheese (aroma $?aroma))
+	=>
+	(if (not (member$ ?a $?aroma))
+		then (retract ?fromage) (minusOne)
+	)
+)
+
+;;; After we have filtered the list by type, texture, colour, flavour and aroma the main propeperties of a cheese, we check the global variable ?*counter* to see if we can determine where to go next.
 ;;; If we have one cheese left, then this is the answer and we can assert and trigger the success rule.
 ;;; If 0 cheeses are left we assert false, as no cheese passed the filtering.
 ;;; If there exists more than one cheese in the list, then we know that we need additional details and so we query the user for supplemental information. We assert (needMoreFacts ?type ?texture ?colour) for the program to progress.
@@ -495,18 +514,76 @@
 	?texture <- (cheeseTexture ?tx)
 	?colour <- (cheeseColour ?c)
 	?flavour <- (cheeseFlavour ?f)
+	?aroma <- (cheeseAroma ?a)
 	=>
-	(retract ?type ?texture ?colour ?flavour)
+	(retract ?type ?texture ?colour ?flavour ?aroma)
 	(if (eq ?*counter* 1)
 		then (assert (found true))
 	else (if (eq ?*counter* 0)
 			then (assert (found false))
 		 ) 
 	else (if (> ?*counter* 1)
-			then (assert (needMoreFacts ?t ?tx ?c ?f))
+			then (assert (needMoreFacts ?t ?tx ?c ?f ?a))
 		 ) 
 	)	
 )
 
 ;;; If we're at this point it needs that we need more facts about the cheese in question.
+(defrule needMoreFacts
+	(needMoreFacts ?t ?tx ?c ?f ?a)
+	=>
+	(bind ?common-useage (ask-question "### What is the most common use of the cheese? (table-cheese bread cooking pasta salad melting dip dessert dressing pizza cheesecake) ### " "" "" table-cheese bread cooking pasta salad melting dip dessert dressing pizza cheesecake))
+	(assert (cheeseUseage ?common-useage))
+)
 
+;;; Final filter and update
+(defrule filterBy-Useage
+	(cheeseUseage ?u)
+	?fromage <- (cheese (common-useage $?common-useage))
+	=>
+	(if (not (member$ ?u $?common-useage))
+		then (retract ?fromage) (minusOne)
+	)
+	(if (eq ?*counter* 1)
+		then (assert (found true))
+	)
+)
+
+;;; If the fact (found true) is present, it means that we have only one (cheese) fact in memory, thus we have our specimen.
+;;; We assign this animal to the variable ?fromage and print the details for the user
+(defrule matchFound
+	?f <- (found true)
+	?fromage <- (cheese (name ?n) 
+						(milk-source ?m) 
+						(country ?co)
+						(type ?t)
+						(texture ?tx)
+						(colour ?c)
+						(flavour ?fl)
+						(aroma ?a)
+						(common-useage ?u)
+				)
+	=>
+	(retract ?f ?fromage)
+	(printout t "*********************" crlf)
+	(printout t "* Cheese found!" crlf)
+	(printout t "* Name: " ?n crlf)
+	(printout t "* Milk Source: " ?m crlf)
+	(printout t "* Country: " ?co crlf)
+	(printout t "* Texture: " ?tx crlf)
+	(printout t "* Colour: " ?c crlf)
+	(printout t "* Flavour: " ?fl crlf)
+	(printout t "* Aroma: " ?a crlf)
+	(printout t "* Common Useage: " ?u crlf)
+	(printout t "*********************" crlf)
+)
+
+;;; If the fact (found false) is present, we have no (cheese) facts in memory. This means we have no results with the given criteria. We then print the failure to the user.
+(defrule matchNotFound
+	?f <- (found false)
+	=>
+	(retract ?f)
+	(printout t "*********************" crlf)
+	(printout t "* No matching cheese found" crlf)
+	(printout t "*********************" crlf)
+)
