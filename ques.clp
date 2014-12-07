@@ -71,29 +71,30 @@
 	(if (member (lowcase ?reply) ?answers) 
      then (assert (cheesedets ?category is ?value))
           ;(retract ?f2)
-     ;else (assert (goal is ?variable))
+          (assert (answer is yes))
+     else (assert (answer is no))
     )
 )
 
 (defrule remove-facts
 	(cheesedets ?category is ?value)
-	?f2 <- (cheese (name ?) (milk-source ?) (country ?) (type ~?value) (texture ?) (colour ?) (flavour ?) (aroma ?) (common-useage ?))
-	;?f3 <- (question ?category ~?value $?)
-	;?f <- (type ~?value)
+	;?f1 <- (cheese (name ?) (milk-source ?) (country ?) (type ~?value) (texture ?) (colour ?) (flavour ?) (aroma ?) (common-useage ?))
+	?f2 <- (question ?category ~?value $?)
+	?f3 <- (cheese (type ~?value))
 =>
 	;(retract ?f1)
 	(retract ?f2)
-	;(retract ?f3)
+	(retract ?f3)
 )
 
-(defrule remove-question
-	(cheesedets ?category is ?value)
-	?f1 <- (cheesedets ?category is ?value)
-	?f2 <- (question ?category ~?value $?)
-=>
-	(retract ?f1)
-	(retract ?f2)
-)
+;(defrule remove-question
+;	(cheesedets ?category is ?value)
+;	?f1 <- (cheesedets ?category is ?value)
+;	?f2 <- (question ?category ~?value $?)
+;=>
+;	(retract ?f1)
+;	(retract ?f2)
+;)
 
 (deffacts knowledgebase
 

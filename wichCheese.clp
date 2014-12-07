@@ -474,11 +474,20 @@
 ;;; This rule filters the cheese by colour, and deletes that do not match. As usual, we update our counter by calling the (minusOne) function.
 (defrule filterBy-Colour
   (cheeseColour ?c)
+  (cheeseNotFound) 
+  (cheeseFound)
   ?fromage <- (cheese (colour $?colour))
   =>
   (if (not (member$ ?c $?colour))
     then (retract ?fromage) (minusOne) (cheeseNotFound) (cheeseFound)
   )
+)
+
+(defrule check-facts-at-colour
+  ?f <- (cheeseColour ?)
+=>
+  (cheeseNotFound)
+  (retract ?f)
 )
 
 
@@ -502,6 +511,13 @@
   )
 )
 
+(defrule check-facts-at-flavour
+  ?f <- (cheeseFlavour ?)
+=>
+  (cheeseNotFound)
+  (retract ?f)
+)
+
 ;;; For further refinement, we ask the user about the aroma of the cheese before we proceed to check the list of cheeses that remain
 ;;; The answer is stored as the following fact: (cheeseAroma: aroma)
 (defrule mainQuestion-Aroma
@@ -519,6 +535,13 @@
   (if (not (member$ ?a $?aroma))
     then (retract ?fromage) (minusOne) (cheeseNotFound) (cheeseFound)
   )
+)
+
+(defrule check-facts-at-aroma
+  ?f <- (cheeseAroma ?)
+=>
+  (cheeseNotFound)
+  (retract ?f)
 )
 
 ;;; Final question about the cheese. We ask for the most common use of the cheese.
