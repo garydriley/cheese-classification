@@ -61,8 +61,10 @@
   	(cheese (name "cheddar") 
   			(milk-source cow) 
   			(country "united-kingdom") 
-  			(type hard) (texture firm) 
-  			(colour yellow) (flavour strong) 
+  			(type hard) 
+  			(texture firm crumbly) 
+  			(colour yellow) 
+  			(flavour strong) 
   			(aroma none) 
   			(common-useage melting)
   	)
@@ -504,33 +506,9 @@
 	)
 )
 
-;;; After we have filtered the list by type, texture, colour, flavour and aroma the main propeperties of a cheese, we check the global variable ?*counter* to see if we can determine where to go next.
-;;; If we have one cheese left, then this is the answer and we can assert and trigger the success rule.
-;;; If 0 cheeses are left we assert false, as no cheese passed the filtering.
-;;; If there exists more than one cheese in the list, then we know that we need additional details and so we query the user for supplemental information. We assert (needMoreFacts ?type ?texture ?colour) for the program to progress.
-
-(defrule postFilteringEvaluation
-	?type <- (cheeseType ?t)
-	?texture <- (cheeseTexture ?tx)
-	?colour <- (cheeseColour ?c)
-	?flavour <- (cheeseFlavour ?f)
-	?aroma <- (cheeseAroma ?a)
-	=>
-	(retract ?type ?texture ?colour ?flavour ?aroma)
-	(if (eq ?*counter* 1)
-		then (assert (found true))
-	else (if (eq ?*counter* 0)
-			then (assert (found false))
-		 ) 
-	else (if (> ?*counter* 1)
-			then (assert (needMoreFacts ?t ?tx ?c ?f ?a))
-		 ) 
-	)	
-)
-
-;;; If we're at this point it needs that we need more facts about the cheese in question.
-(defrule needMoreFacts
-	(needMoreFacts ?t ?tx ?c ?f ?a)
+;;; Final question about the cheese. We ask for the most common use of the cheese.
+(defrule mainQuestion-Useage
+	(cheeseAroma ?a)
 	=>
 	(bind ?common-useage (ask-question "### What is the most common use of the cheese? (table-cheese bread cooking pasta salad melting dip dessert dressing pizza cheesecake) ### " "" "" table-cheese bread cooking pasta salad melting dip dessert dressing pizza cheesecake))
 	(assert (cheeseUseage ?common-useage))
@@ -544,9 +522,31 @@
 	(if (not (member$ ?u $?common-useage))
 		then (retract ?fromage) (minusOne)
 	)
+)
+
+;;; After we have filtered the list by type, texture, colour, flavour and aroma the main propeperties of a cheese, we check the global variable ?*counter* to see if we can determine where to go next.
+;;; If we have one cheese left, then this is the answer and we can assert and trigger the success rule.
+;;; If 0 cheeses are left we assert false, as no cheese passed the filtering.
+;;; If there exists more than one cheese in the list, then we know that we need additional details and so we query the user for supplemental information. We assert (needMoreFacts ?type ?texture ?colour) for the program to progress.
+
+(defrule postFilteringEvaluation
+	?type <- (cheeseType ?t)
+	?texture <- (cheeseTexture ?tx)
+	?colour <- (cheeseColour ?c)
+	?flavour <- (cheeseFlavour ?f)
+	?aroma <- (cheeseAroma ?a)
+	?common-useage <- (cheeseUseage ?u)
+	=>
+	(retract ?type ?texture ?colour ?flavour ?aroma ?common-useage)
 	(if (eq ?*counter* 1)
 		then (assert (found true))
-	)
+	else (if (eq ?*counter* 0)
+			then (assert (found false))
+		 ) 
+	else (if (> ?*counter* 1)
+			then (assert (found false))
+		 ) 
+	)	
 )
 
 ;;; If the fact (found true) is present, it means that we have only one (cheese) fact in memory, thus we have our specimen.
