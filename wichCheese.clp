@@ -288,11 +288,159 @@
   			(common-useage salad)
   	)
   	;;; Reblochon
-  (cheese (name reblochon) (milk-source cow) (country france) (type semi-soft) (texture firm) (colour white) (flavour mild) (aroma mild) (common-useage table-cheese))
-  (cheese (name castigliano) (milk-source cow) (country spain) (type hard) (texture firm) (colour yellow) (flavour spicy) (aroma pleasant) (common-useage table-cheese))
-  (cheese (name caciotta-al-tartufo) (milk-source sheep) (country italy) (type semi-soft) (texture firm) (color white) (flavour mild) (aroma pungent) (common-useage salad))
-  (cheese (name innes-button) (milk-source goat) (country united-kingdom) (type soft) (texture smooth) (color white) (flavour rich) (aroma none) (common-useage bread))
-  (cheese (name brunost) (milk-source cow) (country germany) (type semi-soft) (texture firm) (color yellow) (flavour sweet) (aroma none) (common-useage dip))
-  (cheese (name sapsago) (milk-source cow) (country switzerland) (type hard) (texture firm) (color green) (flavour rich) (aroma pleasant) (common-useage bread))
-  (cheese (name calcagno) (milk-source sheep) (country italy) (type hard) (texture smooth) (color pale-yellow) (flavour rich) (aroma pleasant) (common-useage salad))
-  (cheese (name manchego) (milk-source sheep) (country spain) (type semi-soft) (texture smooth) (color pale-yellow) (flavour sweet) (aroma none) (common-useage table-cheese)))
+  	(cheese (name "reblochon") 
+  			(milk-source cow) 
+  			(country "france") 
+  			(type semi-soft) 
+  			(texture firm) 
+  			(colour white) 
+  			(flavour mild) 
+  			(aroma mild) 
+  			(common-useage table-cheese)
+  	)
+  	;;; Castigliano
+  	(cheese (name "castigliano") 
+  			(milk-source cow) 
+  			(country "spain") 
+  			(type hard) 
+  			(texture firm) 
+  			(colour yellow) 
+  			(flavour spicy) 
+  			(aroma pleasant) 
+  			(common-useage table-cheese)
+  	)
+  	;;; Caciotta-al-Tartufo
+  	(cheese (name "caciotta-al-tartufo") 
+  			(milk-source sheep) 
+  			(country "italy") 
+  			(type semi-soft) 
+  			(texture firm) 
+  			(color white) 
+  			(flavour mild) 
+  			(aroma pungent) 
+  			(common-useage salad)
+  	)
+  	;;; Innes-Button
+  	(cheese (name "innes-button") 
+  			(milk-source goat) 
+  			(country "united-kingdom") 
+  			(type soft) 
+  			(texture smooth) 
+  			(color white) 
+  			(flavour rich) 
+  			(aroma none) 
+  			(common-useage bread)
+  	)
+  	;;; Brunost
+  	(cheese (name "brunost") 
+  			(milk-source cow) 
+  			(country "germany") 
+  			(type semi-soft) 
+  			(texture firm) 
+  			(color yellow) 
+  			(flavour sweet) 
+  			(aroma none) 
+  			(common-useage dip)
+  	)
+  	;;; Sapsago
+  	(cheese (name "sapsago") 
+  			(milk-source cow) 
+  			(country "switzerland") 
+  			(type hard) 
+  			(texture firm) 
+  			(color green) 
+  			(flavour rich) 
+  			(aroma pleasant) 
+  			(common-useage bread)
+  	)
+  	;;; Calcagno
+  	(cheese (name "calcagno") 
+  			(milk-source sheep) 
+  			(country "italy") 
+  			(type hard) 
+  			(texture smooth) 
+  			(color pale-yellow) 
+  			(flavour rich) 
+  			(aroma pleasant) 
+  			(common-useage salad)
+  	)
+  	;;; Machego
+  	(cheese (name "manchego") 
+  			(milk-source sheep) 
+  			(country "spain") 
+  			(type semi-soft) 
+  			(texture smooth) 
+  			(color pale-yellow) 
+  			(flavour sweet) 
+  			(aroma none) 
+  			(common-useage table-cheese)
+  	)
+)
+
+;;; Keep track of the number of available cheeses.
+(defglobal ?*counter* = 30)
+
+;;; The counter is modified each time we exclude a cheese from
+;;; the possible solutions. It reduces the list by one.
+(deffunction minusOne ()
+	(bind ?*counter* (- ?*counter* 1))
+)
+
+;;; This function is used for every question made to the user.
+;;; The question is broken into three arguments (?qBEG ?qMID ?qEND)
+;;; The argument $?allowed-values is a list that holds the responses that the program accepts.
+;;; If a non-acceptable value is entered, the program repeats the question until the response is valid.
+(deffunction ask-question (?qBEG ?qMID ?qEND $?allowed-values)
+	(printout t ?qBEG ?qMID ?qEND)
+	(bind ?answer (read))
+	(if (lexemep ?answer)
+		then (bind ?answer (lowcase ?answer))
+	)
+	(while (not (member ?answer ?allowed-values)) do
+		(printout t ?qBEG ?qMID ?qEND)
+		(bind ?answer (read))
+		(if (lexemep ?answer)
+			then (bind ?answer (lowcase ?answer)))
+	)
+?answer)
+
+;;; First question. We ask for the type of cheese. Accepted answers are semi-soft, soft, semi-hard, hard and blue.
+;;; The result is stored as the following fact: (cheeseType ?type)
+(defrule mainQuestion-Type
+	?x <- (initial-fact)
+	=>
+	(retract ?x)
+	(bind ?type (ask-question "###  What type of cheese is it? (semi-soft soft semi-hard hard blue) ### " "" "" semi-soft soft semi-hard hard blue))
+	(assert (cheeseType ?type))	
+)
+
+;;; Using the fact (cheeseType ?type), the program triggers this rule to filter the cheese by type, and deletes those that are not in the give category. The counter is updated each time this happens
+(defrule filterBy-Type
+	(cheeseType ?t)
+	?fromage <- (cheese (type $?type))
+	=>
+	(if (not (member$ ?t $?type))
+		then (retract ?fromage) (minusOne)
+	)
+)
+
+;;; We proceed to ask the user about the texture of the cheese.
+;;; The answer is stored as the following fact: (cheeseTexture ?texture)
+(defrule mainQuestion-Texture
+	(cheeseType ?t)
+	=>
+	(bind ?texture (ask-question "### How would you describe the texture of the cheese? (crumbly springy firm creamy smooth) ### " "" "" crumbly springy firm creamy smooth))
+	(assert (cheeseTexture ?texture))
+)
+
+;;; Now that we have a value for the fact (cheeseTexture ?texture), we trigger this rule to filter once again and delete the cheeses that do not have this property
+;;; We update the counter as required
+
+(defrule filterBy-Texture
+	(cheeseTexture ?tx)
+	?fromage <- (cheese (texture $?texture))
+	=>
+	(if (not (member$ ?tx $?texture))
+		then (retract ?fromage) (minusOne)
+	)
+)
