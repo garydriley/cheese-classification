@@ -474,18 +474,17 @@
 ;;; This rule filters the cheese by colour, and deletes that do not match. As usual, we update our counter by calling the (minusOne) function.
 (defrule filterBy-Colour
   (cheeseColour ?c)
-  (cheeseNotFound) 
-  (cheeseFound)
   ?fromage <- (cheese (colour $?colour))
   =>
   (if (not (member$ ?c $?colour))
-    then (retract ?fromage) (minusOne) (cheeseFound)
+    then (retract ?fromage) (minusOne)
   )
 )
 
 (defrule check-facts-at-colour
   ?f <- (cheeseColour ?)
 =>
+  (cheeseFound)
   (cheeseNotFound)
   (retract ?f)
 )
@@ -507,13 +506,14 @@
   ?fromage <- (cheese (flavour $?flavour))
   =>
   (if (not (member$ ?f $?flavour))
-    then (retract ?fromage) (minusOne) (cheeseFound)
+    then (retract ?fromage) (minusOne)
   )
 )
 
 (defrule check-facts-at-flavour
   ?f <- (cheeseFlavour ?)
 =>
+  (cheeseFound)
   (cheeseNotFound)
   (retract ?f)
 )
@@ -533,13 +533,14 @@
   ?fromage <- (cheese (aroma $?aroma))
   =>
   (if (not (member$ ?a $?aroma))
-    then (retract ?fromage) (minusOne) (cheeseFound)
+    then (retract ?fromage) (minusOne)
   )
 )
 
 (defrule check-facts-at-aroma
   ?f <- (cheeseAroma ?)
 =>
+  (cheeseFound)
   (cheeseNotFound)
   (retract ?f)
 )
