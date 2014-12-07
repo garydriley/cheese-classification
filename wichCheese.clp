@@ -461,6 +461,14 @@
   )
 )
 
+(defrule check-facts-at-texture
+  ?f <- (cheeseTexture ?)
+=>
+  (cheeseFound)
+  (cheeseNotFound)
+  (retract ?f)
+)
+
 ;;; Next up, we ask the user about the colour of the cheese.
 ;;; The answer is stored as the following fact: (cheeseColour ?colour)
 (defrule mainQuestion-Colour
