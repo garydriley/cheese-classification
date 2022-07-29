@@ -1,3 +1,44 @@
+This fork reimplements the original program logic generalizing portions of the code and adding additional functionality.
+
+CLIPS> (load cheese.clp)
++%%%%%!!!!**+********+*+****$$$
+TRUE
+CLIPS> (reset)
+CLIPS> (run)
+
+Welcome to the Cheese Classification System which allows
+you to discover cheeses through a series of questions.
+
+You may enter skip in response to a question to
+skip that question or stop to end the program.
+
+What type of cheese is it? (semi-soft soft semi-hard hard blue) hard
+How would you describe the texture of the cheese? (crumbly springy firm creamy smooth) skip
+What is the most common use of the cheese? (table-cheese bread cooking pasta salad melting dip dessert dressing pizza cheesecake) dip
+
+Your last choice eliminated all remaining cheeses.
+You can list the remaining cheeses, skip this question,
+choose a different answer for the last question, or stop.
+
+Choose an option:  (list skip choose stop) choose
+What is the most common use of the cheese? (table-cheese bread cooking pasta salad melting dip dessert dressing pizza cheesecake) pasta
+
+The cheese matching your choices is 
+
+   Name: parmesan
+   Milk Source: cow
+   Type: hard
+   Country: Italy
+   Texture: crumbly
+   Color: white
+   Flavor: strong
+   Aroma: strong
+   Common Usage: pasta
+
+CLIPS> 
+
+Readme from the original repository:
+
 cheese-classification
 =====================
 
